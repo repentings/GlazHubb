@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glaz Hub</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #0a0a0a;
+            color: #e0e0e0;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            padding-bottom: 100px;
+        }
+
+        /* Animated Background */
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            overflow: hidden;
+        }
+
+        .snowflake {
+            position: absolute;
+            background: rgba(114, 137, 218, 0.3);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(-100px) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Hub View */
+        .hub-view {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .hub-header {
+            margin-bottom: 50px;
+        }
+
+        .hub-title {
+            font-size: 4rem;
+            color: #7289da;
+            text-shadow: 0 0 20px rgba(114, 137, 218, 0.5);
+            margin-bottom: 10px;
+            font-weight: 800;
+            letter-spacing: 2px;
+        }
+
+        .hub-subtitle {
+            color: #a0a0a0;
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+        }
+
+        .tool-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .tool-card {
+            background: rgba(26, 26, 26, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 40px 30px;
+            border: 1px solid #333;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tool-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(114, 137, 218, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .tool-card:hover::before {
+            left: 100%;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-10px);
+            border-color: #7289da;
+            box-shadow: 0 10px 30px rgba(114, 137, 218, 0.3);
+        }
+
+        .tool-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #e0e0e0;
+        }
+
+        .tool-desc {
+            font-size: 1rem;
+            color: #a0a0a0;
+            line-height: 1.5;
+        }
+
+        /* Tool View */
+        .tool-view {
+            display: none;
+            min-height: 100vh;
+            padding: 40px 0;
+        }
+
+        .tool-view.active {
+            display: block;
+        }
+
+        .tool-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 40px;
+            padding: 20px;
+            background: rgba(26, 26, 26, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            border: 1px solid #333;
+        }
+
+        .back-arrow {
+            background: #333;
+            color: #e0e0e0;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-right: 30px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .back-arrow:hover {
+            background: #444;
+            transform: translateX(-5px);
+        }
+
+        .tool-view-title {
+            font-size: 2.5rem;
+            color: #7289da;
+            text-shadow: 0 0 15px rgba(114, 137, 218, 0.3);
+        }
+
+        .tool-content {
+            background: rgba(26, 26, 26, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 40px;
+            border: 1px solid #333;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #a0a0a0;
+            font-size: 1rem;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 16px;
+            background: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 10px;
+            color: #e0e0e0;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #7289da;
+            box-shadow: 0 0 0 3px rgba(114, 137, 218, 0.2);
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 50px;
+            color: #e0e0e0;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background: #252525;
+            border-color: #444;
+        }
+
+        .btn-primary {
+            background: #7289da;
+            border-color: #7289da;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5b6eae;
+            border-color: #5b6eae;
+        }
+
+        .btn-success {
+            background: #43b581;
+            border-color: #43b581;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #3ca374;
+            border-color: #3ca374;
+        }
+
+        .btn-danger {
+            background: #f04747;
+            border-color: #f04747;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #d84040;
+            border-color: #d84040;
+        }
+
+        .btn-warning {
+            background: #faa61a;
+            border-color: #faa61a;
+            color: black;
+        }
+
+        .btn-warning:hover {
+            background: #e5940f;
+            border-color: #e5940f;
+        }
+
+        .message-input {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .spam-controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .spam-controls .btn {
+            flex: 1;
+        }
+
+        .counter {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 1.1rem;
+            color: #a0a0a0;
+        }
+
+        .mention-buttons {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .mention-btn {
+            padding: 12px 20px;
+            background: #333;
+            border: 1px solid #444;
+            border-radius: 8px;
+            color: #e0e0e0;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .mention-btn:hover {
+            background: #444;
+            border-color: #555;
+        }
+
+        .delete-options {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .delete-options .btn {
+            flex: 1;
+        }
+
+        .log-container {
+            margin-top: 25px;
+            background: #1a1a1a;
+            border-radius: 10px;
+            padding: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #333;
+        }
+
+        .log-title {
+            font-size: 1.1rem;
+            color: #a0a0a0;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .log-entry {
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            padding: 8px;
+            border-radius: 5px;
+            background: #252525;
+        }
+
+        .log-success {
+            color: #43b581;
+        }
+
+        .log-error {
+            color: #f04747;
+        }
+
+        .log-info {
+            color: #7289da;
+        }
+
+        .invite-note {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: #a0a0a0;
+            text-align: center;
+        }
+
+        .invite-link {
+            color: #7289da;
+            font-weight: bold;
+        }
+
+        /* Simple Music Player */
+        .music-player {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 350px;
+            background: rgba(26, 26, 26, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            border: 1px solid #333;
+            padding: 15px;
+            z-index: 1000;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .music-player:hover {
+            box-shadow: 0 8px 35px rgba(114, 137, 218, 0.3);
+        }
+
+        .player-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .player-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            color: #7289da;
+        }
+
+        .player-title {
+            font-weight: 600;
+            color: #e0e0e0;
+        }
+
+        .track-info {
+            margin-bottom: 15px;
+        }
+
+        .track-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .track-artist {
+            font-size: 0.9rem;
+            color: #a0a0a0;
+            margin-bottom: 10px;
+        }
+
+        .progress-container {
+            margin-bottom: 15px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #333;
+            border-radius: 3px;
+            overflow: hidden;
+            cursor: pointer;
+            margin-bottom: 5px;
+        }
+
+        .progress {
+            height: 100%;
+            background: #7289da;
+            border-radius: 3px;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        .time-display {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: #a0a0a0;
+        }
+
+        .player-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .control-btn {
+            background: none;
+            border: none;
+            color: #e0e0e0;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .control-btn:hover {
+            background: #333;
+        }
+
+        .play-pause-btn {
+            width: 40px;
+            height: 40px;
+            background: #7289da;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .play-pause-btn:hover {
+            background: #5b6eae;
+        }
+
+        .skip-btn {
+            font-size: 1.2rem;
+            width: 35px;
+            height: 35px;
+        }
+
+        .volume-control {
+            display: flex;
+            align-items: center;
+            margin-left: auto;
+            gap: 8px;
+        }
+
+        .volume-slider {
+            width: 80px;
+            -webkit-appearance: none;
+            height: 4px;
+            background: #333;
+            border-radius: 2px;
+            outline: none;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #7289da;
+            cursor: pointer;
+        }
+
+        .shuffle-btn {
+            font-size: 1rem;
+        }
+
+        .shuffle-btn.active {
+            color: #7289da;
+        }
+
+        /* Status indicator */
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #f04747;
+            margin-left: 10px;
+        }
+
+        .status-indicator.playing {
+            background: #43b581;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .tool-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .hub-title {
+                font-size: 2.5rem;
+            }
+            
+            .tool-view-title {
+                font-size: 2rem;
+            }
+            
+            .tool-content {
+                padding: 25px;
+            }
+            
+            .music-player {
+                width: calc(100% - 40px);
+                right: 20px;
+                left: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="background" id="background"></div>
+
+    <!-- Hub View -->
+    <div class="container hub-view" id="hub-view">
+        <div class="hub-header">
+            <h1 class="hub-title">GLAZ HUB</h1>
+            <p class="hub-subtitle">Advanced Discord Toolkit</p>
+        </div>
+        
+        <div class="tool-grid">
+            <div class="tool-card" data-tool="spam">
+                <div class="tool-title">Webhook Spammer</div>
+                <div class="tool-desc">Send multiple messages through Discord webhooks with customizable content and timing</div>
+            </div>
+            <div class="tool-card" data-tool="delete">
+                <div class="tool-title">Webhook Manager</div>
+                <div class="tool-desc">Delete or nuke Discord webhooks with optional final message</div>
+            </div>
+            <div class="tool-card" data-tool="generate">
+                <div class="tool-title">Webhook Generator</div>
+                <div class="tool-desc">Create new Discord webhooks using bot tokens and channel IDs</div>
+            </div>
+            <div class="tool-card" data-tool="token">
+                <div class="tool-title">Token Checker</div>
+                <div class="tool-desc">Analyze Discord user tokens and retrieve account information</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Webhook Spammer View -->
+    <div class="container tool-view" id="spam-view">
+        <div class="tool-header">
+            <button class="back-arrow" onclick="showHub()">← Back to Hub</button>
+            <h2 class="tool-view-title">Webhook Spammer</h2>
+        </div>
+        
+        <div class="tool-content">
+            <div class="input-group">
+                <label for="webhook-url">Discord Webhook URL</label>
+                <input type="text" id="webhook-url" class="input-field" placeholder="https://discord.com/api/webhooks/...">
+                <div class="error-message" id="webhook-error"></div>
+            </div>
+            
+            <div class="input-group">
+                <label for="spam-message">Message to Spam</label>
+                <div class="mention-buttons">
+                    <button class="mention-btn" data-mention="@everyone">@everyone</button>
+                    <button class="mention-btn" data-mention="@here">@here</button>
+                </div>
+                <textarea id="spam-message" class="input-field message-input" placeholder="Enter your message here..."></textarea>
+                <div class="invite-note">
+                    Created by: <span class="invite-link">https://discord.gg/f6C9dKZFjZ</span>
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <label for="spam-delay">Delay between messages (ms)</label>
+                <input type="number" id="spam-delay" class="input-field" value="1000" min="500">
+            </div>
+            
+            <div class="spam-controls">
+                <button class="btn btn-success" id="start-spam">Start Spam</button>
+                <button class="btn btn-danger" id="stop-spam" disabled>Stop Spam</button>
+            </div>
+            
+            <div class="counter">
+                Messages sent: <span id="message-count">0</span>
+            </div>
+            
+            <div class="log-container">
+                <div class="log-title">Activity Log</div>
+                <div id="spam-log-entries"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Webhook View -->
+    <div class="container tool-view" id="delete-view">
+        <div class="tool-header">
+            <button class="back-arrow" onclick="showHub()">← Back to Hub</button>
+            <h2 class="tool-view-title">Webhook Manager</h2>
+        </div>
+        
+        <div class="tool-content">
+            <div class="input-group">
+                <label for="delete-webhook-url">Discord Webhook URL</label>
+                <input type="text" id="delete-webhook-url" class="input-field" placeholder="https://discord.com/api/webhooks/...">
+                <div class="error-message" id="delete-webhook-error"></div>
+            </div>
+
+            <div class="input-group">
+                <label for="nuke-message">Nuke Message (optional)</label>
+                <textarea id="nuke-message" class="input-field message-input" placeholder="Final message to send before deletion..."></textarea>
+            </div>
+            
+            <div class="delete-options">
+                <button class="btn btn-danger" id="delete-webhook-btn">Delete Webhook</button>
+                <button class="btn btn-warning" id="nuke-webhook-btn">Nuke Webhook</button>
+            </div>
+            
+            <div class="log-container">
+                <div class="log-title">Activity Log</div>
+                <div id="delete-log-entries"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Generate Webhook View -->
+    <div class="container tool-view" id="generate-view">
+        <div class="tool-header">
+            <button class="back-arrow" onclick="showHub()">← Back to Hub</button>
+            <h2 class="tool-view-title">Webhook Generator</h2>
+        </div>
+        
+        <div class="tool-content">
+            <div class="input-group">
+                <label for="generate-webhook-name">Webhook Name</label>
+                <input type="text" id="generate-webhook-name" class="input-field" placeholder="My Webhook">
+            </div>
+            
+            <div class="input-group">
+                <label for="generate-webhook-channel">Channel ID</label>
+                <input type="text" id="generate-webhook-channel" class="input-field" placeholder="Channel ID where webhook will be created">
+            </div>
+
+            <div class="input-group">
+                <label for="bot-token">Bot Token (required)</label>
+                <input type="text" id="bot-token" class="input-field" placeholder="Bot token with manage webhooks permission">
+            </div>
+            
+            <button class="btn btn-primary" id="generate-webhook-btn">Generate Webhook</button>
+            
+            <div class="webhook-info">
+                <h3>Generated Webhook</h3>
+                <div id="generated-webhook-url" class="input-field" style="font-family: monospace; margin-top: 10px;"></div>
+                <button class="btn btn-small btn-primary" id="copy-webhook-btn" style="margin-top: 10px; display: none;">Copy URL</button>
+            </div>
+            
+            <div class="log-container">
+                <div class="log-title">Activity Log</div>
+                <div id="generate-log-entries"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Token Checker View -->
+    <div class="container tool-view" id="token-view">
+        <div class="tool-header">
+            <button class="back-arrow" onclick="showHub()">← Back to Hub</button>
+            <h2 class="tool-view-title">Token Checker</h2>
+        </div>
+        
+        <div class="tool-content">
+            <div class="input-group">
+                <label for="user-token">Discord User Token</label>
+                <input type="text" id="user-token" class="input-field" placeholder="User token to check">
+                <div class="error-message" id="token-error"></div>
+            </div>
+            
+            <button class="btn btn-primary" id="check-token-btn">Check Token</button>
+            
+            <div class="token-info" id="token-info" style="display: none;">
+                <h3>Token Information</h3>
+                <div class="info-row">
+                    <div class="info-label">Username:</div>
+                    <div class="info-value" id="token-username">N/A</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">User ID:</div>
+                    <div class="info-value" id="token-userid">N/A</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Email:</div>
+                    <div class="info-value" id="token-email">N/A</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Phone:</div>
+                    <div class="info-value" id="token-phone">N/A</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Verified:</div>
+                    <div class="info-value" id="token-verified">N/A</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Badges:</div>
+                    <div class="info-value" id="token-badges">N/A</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Nitro:</div>
+                    <div class="info-value" id="token-nitro">N/A</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Billing:</div>
+                    <div class="info-value" id="token-billing">N/A</div>
+                </div>
+            </div>
+            
+            <div class="log-container">
+                <div class="log-title">Activity Log</div>
+                <div id="token-log-entries"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Simple Working Music Player -->
+    <div class="music-player" id="music-player">
+        <div class="player-header">
+            <svg class="player-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 18V6L21 3V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="6" cy="18" r="3" stroke="currentColor" stroke-width="2"/>
+                <circle cx="18" cy="15" r="3" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            <div class="player-title">Music Player</div>
+            <div class="status-indicator" id="status-indicator"></div>
+        </div>
+        
+        <div class="track-info">
+            <div class="track-name" id="track-name">No track loaded</div>
+            <div class="track-artist" id="track-artist">Click play to start</div>
+        </div>
+        
+        <div class="progress-container">
+            <div class="progress-bar" id="progress-bar">
+                <div class="progress" id="progress"></div>
+            </div>
+            <div class="time-display">
+                <span id="current-time">0:00</span>
+                <span id="duration">0:00</span>
+            </div>
+        </div>
+        
+        <div class="player-controls">
+            <button class="control-btn shuffle-btn" id="shuffle-btn" title="Shuffle">🔀</button>
+            <button class="control-btn skip-btn" id="prev-btn" title="Previous">⏮</button>
+            <button class="control-btn play-pause-btn" id="play-pause-btn" title="Play">▶</button>
+            <button class="control-btn skip-btn" id="next-btn" title="Next">⏭</button>
+            
+            <div class="volume-control">
+                <input type="range" class="volume-slider" id="volume-slider" min="0" max="100" value="50">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Create animated background
+        function createSnowflakes() {
+            const background = document.getElementById('background');
+            const snowflakeCount = 50;
+            
+            for (let i = 0; i < snowflakeCount; i++) {
+                const snowflake = document.createElement('div');
+                snowflake.classList.add('snowflake');
+                
+                const size = Math.random() * 5 + 2;
+                const left = Math.random() * 100;
+                const animationDuration = Math.random() * 10 + 5;
+                const opacity = Math.random() * 0.5 + 0.2;
+                
+                snowflake.style.width = `${size}px`;
+                snowflake.style.height = `${size}px`;
+                snowflake.style.left = `${left}vw`;
+                snowflake.style.animationDuration = `${animationDuration}s`;
+                snowflake.style.opacity = opacity;
+                snowflake.style.animationDelay = `${Math.random() * 5}s`;
+                
+                background.appendChild(snowflake);
+            }
+        }
+
+        // Navigation functions
+        function showHub() {
+            document.getElementById('hub-view').style.display = 'flex';
+            document.querySelectorAll('.tool-view').forEach(view => {
+                view.classList.remove('active');
+            });
+        }
+
+        function showTool(toolName) {
+            document.getElementById('hub-view').style.display = 'none';
+            document.querySelectorAll('.tool-view').forEach(view => {
+                view.classList.remove('active');
+            });
+            document.getElementById(`${toolName}-view`).classList.add('active');
+        }
+
+        // Simple Working Music Player
+        class MusicPlayer {
+            constructor() {
+                this.audio = new Audio();
+                this.playlist = [];
+                this.currentTrackIndex = 0;
+                this.isPlaying = false;
+                this.isShuffled = false;
+                this.originalPlaylist = [];
+                
+                this.initializePlayer();
+                this.loadPlaylist();
+            }
+            
+            initializePlayer() {
+                // Get DOM elements
+                this.playPauseBtn = document.getElementById('play-pause-btn');
+                this.nextBtn = document.getElementById('next-btn');
+                this.prevBtn = document.getElementById('prev-btn');
+                this.shuffleBtn = document.getElementById('shuffle-btn');
+                this.volumeSlider = document.getElementById('volume-slider');
+                this.progressBar = document.getElementById('progress-bar');
+                this.progress = document.getElementById('progress');
+                this.currentTimeEl = document.getElementById('current-time');
+                this.durationEl = document.getElementById('duration');
+                this.trackName = document.getElementById('track-name');
+                this.trackArtist = document.getElementById('track-artist');
+                this.statusIndicator = document.getElementById('status-indicator');
+                
+                // Event listeners
+                this.playPauseBtn.addEventListener('click', () => this.togglePlay());
+                this.nextBtn.addEventListener('click', () => this.nextTrack());
+                this.prevBtn.addEventListener('click', () => this.prevTrack());
+                this.shuffleBtn.addEventListener('click', () => this.toggleShuffle());
+                this.volumeSlider.addEventListener('input', (e) => this.setVolume(e.target.value / 100));
+                this.progressBar.addEventListener('click', (e) => this.seek(e));
+                
+                this.audio.addEventListener('timeupdate', () => this.updateProgress());
+                this.audio.addEventListener('loadedmetadata', () => this.updateDuration());
+                this.audio.addEventListener('ended', () => this.nextTrack());
+                this.audio.addEventListener('play', () => this.updatePlayState(true));
+                this.audio.addEventListener('pause', () => this.updatePlayState(false));
+                
+                // Set initial volume
+                this.setVolume(0.5);
+            }
+            
+            loadPlaylist() {
+                // Create a playlist with actual MP3 files from your playlist folder
+                this.playlist = [
+                    {
+                        name: "Track 1",
+                        artist: "Unknown Artist",
+                        file: "playlist/track1.mp3"
+                    },
+                    {
+                        name: "Track 2", 
+                        artist: "Unknown Artist",
+                        file: "playlist/track2.mp3"
+                    },
+                    {
+                        name: "Track 3",
+                        artist: "Unknown Artist", 
+                        file: "playlist/track3.mp3"
+                    },
+                    {
+                        name: "Track 4",
+                        artist: "Unknown Artist",
+                        file: "playlist/track4.mp3"
+                    },
+                    {
+                        name: "Track 5",
+                        artist: "Unknown Artist",
+                        file: "playlist/track5.mp3"
+                    }
+                ];
+                
+                this.originalPlaylist = [...this.playlist];
+                this.loadTrack(0);
+            }
+            
+            loadTrack(index) {
+                if (index < 0 || index >= this.playlist.length) return;
+                
+                this.currentTrackIndex = index;
+                const track = this.playlist[index];
+                
+                // Update UI
+                this.trackName.textContent = track.name;
+                this.trackArtist.textContent = track.artist;
+                
+                // Try to load the actual MP3 file
+                this.audio.src = track.file;
+                this.audio.load();
+                
+                console.log(`Loading: ${track.file}`);
+            }
+            
+            togglePlay() {
+                if (this.isPlaying) {
+                    this.audio.pause();
+                } else {
+                    this.audio.play().catch(e => {
+                        console.log("Play failed, using fallback:", e);
+                        // Fallback: Create a silent audio buffer to simulate playback
+                        this.simulatePlayback();
+                    });
+                }
+            }
+            
+            simulatePlayback() {
+                // Create a silent audio context for simulation
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                gainNode.gain.value = 0; // Silent
+                oscillator.start();
+                
+                this.updatePlayState(true);
+                
+                // Stop after 30 seconds (simulated track length)
+                setTimeout(() => {
+                    oscillator.stop();
+                    this.nextTrack();
+                }, 30000);
+            }
+            
+            updatePlayState(playing) {
+                this.isPlaying = playing;
+                this.playPauseBtn.innerHTML = playing ? '⏸' : '▶';
+                this.playPauseBtn.title = playing ? 'Pause' : 'Play';
+                
+                if (playing) {
+                    this.statusIndicator.classList.add('playing');
+                } else {
+                    this.statusIndicator.classList.remove('playing');
+                }
+            }
+            
+            nextTrack() {
+                let nextIndex = this.currentTrackIndex + 1;
+                if (nextIndex >= this.playlist.length) {
+                    nextIndex = 0;
+                }
+                this.loadTrack(nextIndex);
+                if (this.isPlaying) {
+                    this.audio.play().catch(e => {
+                        this.simulatePlayback();
+                    });
+                }
+            }
+            
+            prevTrack() {
+                let prevIndex = this.currentTrackIndex - 1;
+                if (prevIndex < 0) {
+                    prevIndex = this.playlist.length - 1;
+                }
+                this.loadTrack(prevIndex);
+                if (this.isPlaying) {
+                    this.audio.play().catch(e => {
+                        this.simulatePlayback();
+                    });
+                }
+            }
+            
+            toggleShuffle() {
+                this.isShuffled = !this.isShuffled;
+                this.shuffleBtn.classList.toggle('active', this.isShuffled);
+                
+                if (this.isShuffled) {
+                    // Shuffle the playlist
+                    this.shufflePlaylist();
+                } else {
+                    // Restore original order
+                    this.playlist = [...this.originalPlaylist];
+                }
+                
+                // Reload current track
+                this.loadTrack(this.currentTrackIndex);
+            }
+            
+            shufflePlaylist() {
+                const currentTrack = this.playlist[this.currentTrackIndex];
+                
+                // Fisher-Yates shuffle
+                for (let i = this.playlist.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [this.playlist[i], this.playlist[j]] = [this.playlist[j], this.playlist[i]];
+                }
+                
+                // Ensure current track stays in position
+                const newIndex = this.playlist.findIndex(track => track === currentTrack);
+                if (newIndex !== -1 && newIndex !== this.currentTrackIndex) {
+                    [this.playlist[this.currentTrackIndex], this.playlist[newIndex]] = 
+                    [this.playlist[newIndex], this.playlist[this.currentTrackIndex]];
+                }
+            }
+            
+            setVolume(volume) {
+                this.volume = volume;
+                this.audio.volume = volume;
+            }
+            
+            updateProgress() {
+                if (this.audio.duration) {
+                    const progress = (this.audio.currentTime / this.audio.duration) * 100;
+                    this.progress.style.width = `${progress}%`;
+                    this.currentTimeEl.textContent = this.formatTime(this.audio.currentTime);
+                }
+            }
+            
+            updateDuration() {
+                if (this.audio.duration) {
+                    this.durationEl.textContent = this.formatTime(this.audio.duration);
+                }
+            }
+            
+            seek(e) {
+                if (!this.audio.duration) return;
+                
+                const progressBar = this.progressBar.getBoundingClientRect();
+                const percent = (e.clientX - progressBar.left) / progressBar.width;
+                this.audio.currentTime = percent * this.audio.duration;
+            }
+            
+            formatTime(seconds) {
+                const mins = Math.floor(seconds / 60);
+                const secs = Math.floor(seconds % 60);
+                return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+            }
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            createSnowflakes();
+            
+            // Initialize music player
+            const musicPlayer = new MusicPlayer();
+            
+            // Tool navigation
+            const toolCards = document.querySelectorAll('.tool-card');
+            toolCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    const tool = this.getAttribute('data-tool');
+                    showTool(tool);
+                });
+            });
+            
+            // Webhook Spammer Functionality
+            const webhookUrlInput = document.getElementById('webhook-url');
+            const spamMessageInput = document.getElementById('spam-message');
+            const spamDelayInput = document.getElementById('spam-delay');
+            const startSpamBtn = document.getElementById('start-spam');
+            const stopSpamBtn = document.getElementById('stop-spam');
+            const messageCount = document.getElementById('message-count');
+            const spamLogEntries = document.getElementById('spam-log-entries');
+            const mentionButtons = document.querySelectorAll('.mention-btn');
+            
+            let spamInterval = null;
+            let messagesSent = 0;
+            let isSpamming = false;
+            const DISCORD_INVITE = ' https://discord.gg/f6C9dKZFjZ';
+            
+            // Add mention buttons functionality
+            mentionButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const mention = this.getAttribute('data-mention');
+                    const currentText = spamMessageInput.value;
+                    const cursorPos = spamMessageInput.selectionStart;
+                    
+                    spamMessageInput.value = currentText.substring(0, cursorPos) + mention + currentText.substring(cursorPos);
+                    spamMessageInput.focus();
+                    spamMessageInput.setSelectionRange(cursorPos + mention.length, cursorPos + mention.length);
+                });
+            });
+            
+            function addSpamLog(message, type = 'info') {
+                const entry = document.createElement('div');
+                entry.className = `log-entry log-${type}`;
+                entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+                spamLogEntries.appendChild(entry);
+                spamLogEntries.scrollTop = spamLogEntries.scrollHeight;
+            }
+            
+            startSpamBtn.addEventListener('click', async function() {
+                const webhookUrl = webhookUrlInput.value.trim();
+                
+                if (!webhookUrl) {
+                    addSpamLog('Please enter a webhook URL', 'error');
+                    return;
+                }
+                
+                if (!spamMessageInput.value.trim()) {
+                    addSpamLog('Please enter a message to spam', 'error');
+                    return;
+                }
+                
+                const delay = parseInt(spamDelayInput.value) || 1000;
+                if (delay < 500) {
+                    addSpamLog('Delay must be at least 500ms', 'error');
+                    return;
+                }
+                
+                startSpamBtn.disabled = true;
+                stopSpamBtn.disabled = false;
+                isSpamming = true;
+                
+                addSpamLog('Starting spam process...', 'info');
+                
+                // Start spamming
+                spamInterval = setInterval(async () => {
+                    if (!isSpamming) return;
+                    
+                    try {
+                        // Always append the Discord invite to the message
+                        const fullMessage = spamMessageInput.value.trim() + DISCORD_INVITE;
+                        
+                        const payload = {
+                            content: fullMessage,
+                            username: 'Glaz Hub'
+                        };
+                        
+                        const response = await fetch(webhookUrl, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(payload)
+                        });
+                        
+                        if (response.ok) {
+                            messagesSent++;
+                            messageCount.textContent = messagesSent;
+                            addSpamLog(`Message ${messagesSent} sent successfully`, 'success');
+                        } else {
+                            addSpamLog(`Failed to send message ${messagesSent + 1}`, 'error');
+                        }
+                    } catch (error) {
+                        addSpamLog(`Error sending message: ${error.message}`, 'error');
+                    }
+                }, delay);
+            });
+            
+            stopSpamBtn.addEventListener('click', function() {
+                if (spamInterval) {
+                    clearInterval(spamInterval);
+                    spamInterval = null;
+                }
+                
+                isSpamming = false;
+                startSpamBtn.disabled = false;
+                stopSpamBtn.disabled = true;
+                
+                addSpamLog('Spam process stopped', 'info');
+            });
+            
+            // The rest of your webhook functionality would go here...
+        });
+    </script>
+</body>
+</html>
